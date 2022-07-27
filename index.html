@@ -20,7 +20,6 @@
     
   fetch(api_url).then(response => {return response.json();}).then(data => {
 
-
     var colour = {"Good":"#32CD32","Moderate":"#FFD700","Unhealthy":"#DC143C"}
 
     function get_psi_status(psi){
@@ -52,22 +51,18 @@
     var timestamp = data.items[0].update_timestamp;
     var psi = data.items[0].readings.psi_twenty_four_hourly;
 
-    console.log(colour["Good"])
     for(const i of region){
       var circle = L.circle([i.label_location.latitude, i.label_location.longitude], {
-                color: colour[get_psi_status(psi[i.name])],
-                fillOpacity: 0.5,
-                radius: 1000,
-                }).addTo(map);
+        color: colour[get_psi_status(psi[i.name])],
+        fillOpacity: 0.5,
+        radius: 1000,
+        }).addTo(map);
       circle.bindPopup(`Location: ${i.name} <br> Status: ${get_psi_status(psi[i.name])} <br> PSI: ${psi[i.name]}`);
-      circle.bindTooltip(`${psi[i.name]}`, {permanent: true,direction: 'center',className: "psitooltip"});
-      
+      circle.bindTooltip(`${psi[i.name]}`, {permanent: true,direction: 'center',className: "psitooltip"});  
     }
 
     document.getElementById("timestamp").innerHTML = dayjs(timestamp).format('DD MMM YYYY HH:mm');
     var legend = L.control({ position: "bottomleft" });
-
-
 
       legend.onAdd = function(map) {
         var div = L.DomUtil.create("div", "legend");
