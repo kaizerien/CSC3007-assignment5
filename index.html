@@ -26,7 +26,7 @@
       else if(psi > 50 && psi <= 100)
         return "#FFD700";
       else if(psi > 100)
-        return "#DC143C"
+        return "#DC143C";
     }
 
     let tiles = new L.tileLayer('https://maps-{s}.onemap.sg/v3/Default/{z}/{x}/{y}.png', {
@@ -58,7 +58,7 @@
                 fillOpacity: 0.5,
                 radius: 1000,
                 }).addTo(map);
-      circle.bindPopup(`PSI reading is ${psi[i.name]} at ${i.name}`)
+      circle.bindPopup(`PSI reading is ${psi[i.name]} at ${i.name}`);
       circle.bindTooltip(`${psi[i.name]}`, {permanent: true,direction: 'center',className: "psitooltip"});
       
     }
