@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.8.0/leaflet.css" />
+  <script src="https://unpkg.com/dayjs@1.8.21/dayjs.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.8.0/leaflet.js"></script>
+  <link rel="stylesheet" href="style.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Assignment 5</title>
+</head>
+<body>
+  <h1>Singapore PSI Reading</h1>
+  <p>Last updated: <span id="timestamp"></span><button onClick="window.location.reload();">Update Map</button></p>
+  <div id="map"></div>
+</body>
+</html>
+<script>
+  const api_url = "https://api.data.gov.sg/v1/environment/psi";
+    
+  fetch(api_url).then(response => {return response.json();}).then(data => {
+
+    function get_psi_colour(psi){
+      if(psi < 50)
+        return "#32CD32";
+      else if(psi > 50 && psi <= 100)
+        return "#FFD700";
+      else if(psi > 100)
+        return "#DC143C"
+    }
+
+    let tiles = new L.tileLayer('https://maps-{s}.onemap.sg/v3/Default/{z}/{x}/{y}.png', {
+      detectRetina: true,
+      maxZoom: 18,
+      minZoom: 11,
+      //Do not remove this attribution
+      attribution: '<img src="https://docs.onemap.sg/maps/images/oneMap64-01.png" style="height:20px;width:20px;">' +
+                  'New OneMap | Map data © contributors, <a href="http://SLA.gov.sg">Singapore Land Authority</a>'
+    });
+
+    let map = new L.Map("map", {
+        center: [1.347833, 103.809357], 
+        zoom: 12,
+        maxBounds: L.latLngBounds(L.latLng(1.1, 103.5), L.latLng(1.5, 104.3))
+        })
+        .addLayer(tiles);
+
+    var region = data.region_metadata;
+    var timestamp = data.items[0].update_timestamp;
+    var psi = data.items[0].readings.psi_twenty_four_hourly;
+
+    console.log(region)
+    for(const i of region){
+      console.log(get_psi_colour(psi[i.name]));
+      console.log(i.label_location.latitude);
+      var circle = L.circle([i.label_location.latitude, i.label_location.longitude], {
+                color: get_psi_colour(psi[i.name]),
+                fillOpacity: 0.5,
+                radius: 1000,
+                }).addTo(map);
+      circle.bindPopup(`PSI reading is ${psi[i.name]} at ${i.name}`)
+      circle.bindTooltip(`${psi[i.name]}`, {permanent: true,direction: 'center',className: "psitooltip"});
+      
+    }
+
+    document.getElementById("timestamp").innerHTML = dayjs(timestamp).format('DD MMM YYYY HH:mm');
+    var legend = L.control({ position: "bottomleft" });
+
+
+
+      legend.onAdd = function(map) {
+        var div = L.DomUtil.create("div", "legend");
+        div.innerHTML += "<h4>PSI Levels</h4>";
+        div.innerHTML += '<i style="background: #32CD32"></i><span>Good (0-50)</span><br>';
+        div.innerHTML += '<i style="background: #FFD700"></i><span>Moderate (51-100)</span><br>';
+        div.innerHTML += '<i style="background: #DC143C"></i><span>Unhealthy (101-200)</span><br>';
+
+        return div;
+      };
+      legend.addTo(map);
+
+    });
+</script>
