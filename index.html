@@ -20,13 +20,16 @@
     
   fetch(api_url).then(response => {return response.json();}).then(data => {
 
-    function get_psi_colour(psi){
+
+    var colour = {"Good":"#32CD32","Moderate":"#FFD700","Unhealthy":"#DC143C"}
+
+    function get_psi_status(psi){
       if(psi < 50)
-        return "#32CD32";
+        return "Good";
       else if(psi > 50 && psi <= 100)
-        return "#FFD700";
+        return "Moderate";
       else if(psi > 100)
-        return "#DC143C";
+        return "Unhealthy";
     }
 
     let tiles = new L.tileLayer('https://maps-{s}.onemap.sg/v3/Default/{z}/{x}/{y}.png', {
@@ -49,16 +52,14 @@
     var timestamp = data.items[0].update_timestamp;
     var psi = data.items[0].readings.psi_twenty_four_hourly;
 
-    console.log(region)
+    console.log(colour["Good"])
     for(const i of region){
-      console.log(get_psi_colour(psi[i.name]));
-      console.log(i.label_location.latitude);
       var circle = L.circle([i.label_location.latitude, i.label_location.longitude], {
-                color: get_psi_colour(psi[i.name]),
+                color: colour[get_psi_status(psi[i.name])],
                 fillOpacity: 0.5,
                 radius: 1000,
                 }).addTo(map);
-      circle.bindPopup(`PSI reading is ${psi[i.name]} at ${i.name}`);
+      circle.bindPopup(`Location: ${i.name} <br> Status: ${get_psi_status(psi[i.name])} <br> PSI: ${psi[i.name]}`);
       circle.bindTooltip(`${psi[i.name]}`, {permanent: true,direction: 'center',className: "psitooltip"});
       
     }
